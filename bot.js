@@ -21,6 +21,7 @@ var time;
 var body;
 async function check(){
 	q = new Query({host: mcIP, port: mcPort, timeout: 7500});
+	time = new Date().toLocaleString();
 	// ch.bulkDelete(100).then(messages => console.log(`Bulk deleted ${messages.size} messages`)).catch(console.error);
 	await q.basicStat().then(s => {
 		console.log("online");
@@ -29,7 +30,6 @@ async function check(){
 		status = "Online";
 		color = 65280;
 		players = "**" + s.online_players + "** / **" + s.max_players + "**";
-		time = new Date().toLocaleString();
 		embed = {
 			"author": {
 				"name": serverName + " Server Status",
@@ -59,7 +59,6 @@ async function check(){
 		status = "Offline"
 		color = 16711680
 		players = "**0** / **0**";
-		time = new Date().toLocaleString();
 		embed = {
 			"author": {
 				"name": serverName + " Server Status",
