@@ -10,13 +10,11 @@ var mcIP = config.ip; //Add your Minecraft server IP
 var mcPort = config.port; //The port of the server, default it 25565
 var serverName = 'KOTH'; //Your server name
 var serverUrl = ""; //Server website
-var serverLogo = "https://images-eu.ssl-images-amazon.com/images/I/512dVKB22QL.png"; //Server logo
+var serverLogo = "https://i.imgur.com/szHlGja.png"; //Server logo
+var ch;
 
-bot.on('message', message => {
-
-  if (message.content === prefix + CMD) {
+function check(){
     var url = 'http://mcapi.us/server/status?ip=' + mcIP + '&port=' + mcPort;
-	var ch = message.channel;
 	ch.bulkDelete(100).then(messages => console.log(`Bulk deleted ${messages.size} messages`)).catch(console.error);
     request(url, function (err, response, body) {
       if (err) {
@@ -64,10 +62,16 @@ bot.on('message', message => {
       };
       ch.send({ embed });
     });
-  };
-});
+}
+
 
 bot.on('ready', () => {
-  console.log("Bot is active");
-  bot.user.setActivity(prefix + CMD)
+	console.log("Bot is active");
+	bot.channels.fetch(config.channel).then(channel => {
+		console.log(channel.name);
+		ch=channel;
+		check();
+	}).catch(console.error);
+	bot.user.setActivity(prefix + CMD);
+	setInterval(check,30000);
 });
