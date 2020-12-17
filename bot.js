@@ -22,6 +22,7 @@ var body;
 async function check(){
 	q = new Query({host: mcIP, port: mcPort, timeout: 7500});
 	time = new Date().toLocaleString();
+	time = time.slice(0,-6)+time.slice(-3);
 	// ch.bulkDelete(100).then(messages => console.log(`Bulk deleted ${messages.size} messages`)).catch(console.error);
 	await q.basicStat().then(s => {
 		console.log("online");
@@ -99,5 +100,5 @@ bot.on('ready', () => {
 			check();
 		}).catch(console.error);
 	}).catch(console.error);
-	setInterval(check,30000);
+	setInterval(check,60000);
 });
