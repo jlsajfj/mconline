@@ -6,3 +6,5 @@ The visual functionality is taken from [Cactooz's MinecraftServer-DiscordBot](ht
 To start up the bot initially, send "!!load" to the channel where you want the bot to run.
 
 Rename config-example.json to config.json and set it up with what you need.
+
+It only functions on one server so don't overdo it.
