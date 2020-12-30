@@ -1,9 +1,16 @@
 const Discord = require('discord.js');
 const Query = require("minecraft-query");
+const FS = require('fs');
+const mp = './message.json';
 
 const bot = new Discord.Client();
 const config = require('./config.json');
+var messageConfig;
 bot.login(config.token);
+
+var setup = false;
+var messageLoc;
+var channelLoc;
 
 var mcIP = config.ip;
 var dIP = config.displayip;
@@ -12,6 +19,7 @@ var serverName = 'KOTH';
 var serverLogo = "https://i.imgur.com/szHlGja.png";
 var ch;
 
+var messs;
 var q;
 var embed;
 var status;
@@ -25,7 +33,7 @@ async function check(){
 	time = time.slice(0,-6)+time.slice(-3);
 	// ch.bulkDelete(100).then(messages => console.log(`Bulk deleted ${messages.size} messages`)).catch(console.error);
 	await q.basicStat().then(s => {
-		console.log("online");
+		console.log("server is online");
 		//console.log(s);
 		q.close();
 		status = "Online";
@@ -53,9 +61,9 @@ async function check(){
 				"text": "IP: " + dIP + "\nUpdated at: " + time
 			}
 		};
-		msg.edit({ embed });
+		mess.edit({ embed });
 	}).catch(e => {
-		console.log("offline");
+		console.log("server is offline");
 		//console.log(e);
 		status = "Offline"
 		color = 16711680
@@ -82,23 +90,80 @@ async function check(){
 				"text": "IP: " + dIP + "\nUpdated at: " + time
 			}
 		};
-		msg.edit({ embed });
+		mess.edit({ embed });
 	});
 	console.log(time);
 	console.log();
 }
 
+var running;
+
+bot.on('message', msg => {
+	if(msg.content === '!!load'){
+		console.log('\x1b[32mload initiated\x1b[0m');
+		if(setup){
+			clearInterval(running);
+		}
+		channelLoc = msg.channel.id;
+		
+		msg.channel.send('',{
+			embed: {
+				"title": "Hello!",
+				"description": "Bot is currently setting up.\nThis message should disappear soon."
+			}
+		}).then( mmsg => {
+			messageLoc = mmsg.id;
+			var temp = {
+				message: messageLoc,
+				channel: channelLoc
+			};
+			var data = JSON.stringify(temp);
+			FS.writeFileSync('message.json', data);
+			bot.channels.fetch(channelLoc).then(channel => {
+				console.log(channel.name);
+				ch=channel;
+				ch.messages.fetch(messageLoc).then(message => {
+					console.log(message.author);
+					mess = message;
+					check();
+				}).catch(console.error);
+			}).catch(console.error);
+			running = setInterval(check,60000);
+			setup = true;
+		}).catch(console.error);
+		msg.delete().catch(console.error);
+	}
+});
 
 bot.on('ready', () => {
 	console.log("Bot is active");
-	bot.channels.fetch(config.channel).then(channel => {
-		console.log(channel.name);
-		ch=channel;
-		ch.messages.fetch(config.message).then(message => {
-			console.log(message.author);
-			msg = message;
-			check();
-		}).catch(console.error);
-	}).catch(console.error);
-	setInterval(check,60000);
+	try{
+		if(FS.existsSync(mp)){
+			console.log('\x1b[32mbot is starting up\x1b[0m');
+			setup = true;
+			messageConfig = require(mp);
+			messageLoc = messageConfig.message;
+			channelLoc = messageConfig.channel;
+			bot.channels.fetch(channelLoc).then(channel => {
+				console.log(channel.name);
+				ch=channel;
+				ch.messages.fetch(messageLoc).then(message => {
+					//console.log(message.author);
+					mess = message;
+					check();
+					running = setInterval(check,60000);
+					console.log('\x1b[32mbot is done loading\x1b[0m');
+				}).catch(e => {
+					console.log('\x1b[31myour config is invalid\x1b[0m');
+					console.log('\x1b[31mplease delete your message.json file\x1b[0m');
+					process.exit();
+				});
+			}).catch(console.error);
+		} else {
+			console.log('\x1b[31mmessage.json does not exist\x1b[0m');
+		}
+	} catch(e) {
+		console.log(e);
+		console.log('\x1b[31mplease delete your message.json file\x1b[0m');
+	}
 });
