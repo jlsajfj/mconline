@@ -1,0 +1,6 @@
+{
+  "token": "BOT_TOKEN",
+  "ip": "SERVER_IP",
+  "displayip": "WHAT_TO_SHOW_IN_EMBED_FOR_IP",
+  "port": PORT_NUMBER
+}
