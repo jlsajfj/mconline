@@ -17,9 +17,8 @@ var dIP = config.displayip;
 var mcPort = config.port;
 var serverName = 'KOTH';
 var serverLogo = "https://i.imgur.com/szHlGja.png";
-var ch;
 
-var messs;
+var mess;
 var q;
 var embed;
 var status;
@@ -28,142 +27,137 @@ var players;
 var time;
 var body;
 async function check(){
-	q = new Query({host: mcIP, port: mcPort, timeout: 7500});
-	time = new Date().toLocaleString();
-	time = time.slice(0,-6)+time.slice(-3);
-	// ch.bulkDelete(100).then(messages => console.log(`Bulk deleted ${messages.size} messages`)).catch(console.error);
-	await q.basicStat().then(s => {
-		console.log("server is online");
-		//console.log(s);
-		q.close();
-		status = "Online";
-		color = 65280;
-		players = "**" + s.online_players + "** / **" + s.max_players + "**";
-		embed = {
-			"author": {
-				"name": serverName + " Server Status",
-				"icon_url": serverLogo
-			},
-			"color": color,
-			"fields": [
-				{
-					"name": "Status:",
-					"value": status,
-					"inline": true
-				},
-				{
-					"name": "Players Online:",
-					"value": players,
-					"inline": true
-				}
-			],
-			"footer": {
-				"text": "IP: " + dIP + "\nUpdated at: " + time
-			}
-		};
-		mess.edit({ embed });
-	}).catch(e => {
-		console.log("server is offline");
-		//console.log(e);
-		status = "Offline"
-		color = 16711680
-		players = "**0** / **0**";
-		embed = {
-			"author": {
-				"name": serverName + " Server Status",
-				"icon_url": serverLogo
-			},
-			"color": color,
-			"fields": [
-				{
-					"name": "Status:",
-					"value": status,
-					"inline": true
-				},
-				{
-					"name": "Players Online:",
-					"value": players,
-					"inline": true
-				}
-			],
-			"footer": {
-				"text": "IP: " + dIP + "\nUpdated at: " + time
-			}
-		};
-		mess.edit({ embed });
-	});
-	console.log(time);
-	console.log();
+    q = new Query({host: mcIP, port: mcPort, timeout: 7500});
+    time = new Date().toLocaleString();
+    time = time.slice(0,-6)+time.slice(-3);
+    
+    await q.basicStat().then(s => {
+        console.log("server is online");
+        //console.log(s);
+        q.close();
+        status = "Online";
+        color = 65280;
+        players = "**" + s.online_players + "** / **" + s.max_players + "**";
+        embed = {
+            "author": {
+                "name": serverName + " Server Status",
+                "icon_url": serverLogo
+            },
+            "color": color,
+            "fields": [
+                {
+                    "name": "Status:",
+                    "value": status,
+                    "inline": true
+                },
+                {
+                    "name": "Players Online:",
+                    "value": players,
+                    "inline": true
+                }
+            ],
+            "footer": {
+                "text": "IP: " + dIP + "\nUpdated at: " + time
+            }
+        };
+        mess.edit({ embed });
+    }).catch(e => {
+        console.log("server is offline");
+        //console.log(e);
+        status = "Offline"
+        color = 16711680
+        players = "**0** / **0**";
+        embed = {
+            "author": {
+                "name": serverName + " Server Status",
+                "icon_url": serverLogo
+            },
+            "color": color,
+            "fields": [
+                {
+                    "name": "Status:",
+                    "value": status,
+                    "inline": true
+                },
+                {
+                    "name": "Players Online:",
+                    "value": players,
+                    "inline": true
+                }
+            ],
+            "footer": {
+                "text": "IP: " + dIP + "\nUpdated at: " + time
+            }
+        };
+        mess.edit({ embed });
+    });
+    console.log(time);
+    console.log();
 }
 
 var running;
 
 bot.on('message', msg => {
-	if(msg.content === '!!load'){
-		console.log('\x1b[32mload initiated\x1b[0m');
-		if(setup){
-			clearInterval(running);
-		}
-		channelLoc = msg.channel.id;
-		
-		msg.channel.send('',{
-			embed: {
-				"title": "Hello!",
-				"description": "Bot is currently setting up.\nThis message should disappear soon."
-			}
-		}).then( mmsg => {
-			messageLoc = mmsg.id;
-			var temp = {
-				message: messageLoc,
-				channel: channelLoc
-			};
-			var data = JSON.stringify(temp);
-			FS.writeFileSync('message.json', data);
-			bot.channels.fetch(channelLoc).then(channel => {
-				console.log(channel.name);
-				ch=channel;
-				ch.messages.fetch(messageLoc).then(message => {
-					console.log(message.author);
-					mess = message;
-					check();
-				}).catch(console.error);
-			}).catch(console.error);
-			running = setInterval(check,60000);
-			setup = true;
-		}).catch(console.error);
-		msg.delete().catch(console.error);
-	}
+    if(msg.content === '!!load'){
+        console.log('\x1b[32mload initiated\x1b[0m');
+        if(setup){
+            clearInterval(running);
+            mess.delete().catch(console.error)
+        }
+        channelLoc = msg.channel.id;
+        
+        msg.channel.send('',{
+            embed: {
+                "title": "Hello!",
+                "description": "Bot is currently setting up.\nThis message should disappear soon."
+            }
+        }).then( mmsg => {
+            messageLoc = mmsg.id;
+            var temp = {
+                message: messageLoc,
+                channel: channelLoc
+            };
+            
+            var data = JSON.stringify(temp);
+            FS.writeFileSync('message.json', data);
+            mess = mmsg;
+            check();
+            running = setInterval(check,60000);
+            setup = true;
+        }).catch(console.error);
+        msg.delete().catch(console.error);
+    }
 });
 
 bot.on('ready', () => {
-	console.log("Bot is active");
-	try{
-		if(FS.existsSync(mp)){
-			console.log('\x1b[32mbot is starting up\x1b[0m');
-			setup = true;
-			messageConfig = require(mp);
-			messageLoc = messageConfig.message;
-			channelLoc = messageConfig.channel;
-			bot.channels.fetch(channelLoc).then(channel => {
-				console.log(channel.name);
-				ch=channel;
-				ch.messages.fetch(messageLoc).then(message => {
-					//console.log(message.author);
-					mess = message;
-					check();
-					running = setInterval(check,60000);
-					console.log('\x1b[32mbot is done loading\x1b[0m');
-				}).catch(e => {
-					console.log('\x1b[31myour config is invalid\x1b[0m');
-					console.log('\x1b[31mplease delete your message.json file\x1b[0m');
-					process.exit();
-				});
-			}).catch(console.error);
-		} else {
-			console.log('\x1b[31mmessage.json does not exist\x1b[0m');
-		}
-	} catch(e) {
-		console.log(e);
-		console.log('\x1b[31mplease delete your message.json file\x1b[0m');
-	}
+    console.log("Bot is active");
+    try{
+        if(FS.existsSync(mp)){
+            console.log('\x1b[32mbot is starting up\x1b[0m');
+            setup = true;
+            messageConfig = require(mp);
+            messageLoc = messageConfig.message;
+            channelLoc = messageConfig.channel;
+            bot.channels.fetch(channelLoc).then(channel => {
+                console.log(channel.name);
+                
+                channel.messages.fetch(messageLoc).then(message => {
+                    //console.log(message.author);
+                    mess = message;
+                    check();
+                    running = setInterval(check,60000);
+                    console.log('\x1b[32mbot is done loading\x1b[0m');
+                }).catch(e => {
+                    console.log('\x1b[31myour config is invalid\x1b[0m');
+                    console.log('\x1b[31mplease delete your message.json file\x1b[0m');
+                    process.exit();
+                });
+            }).catch(console.error);
+        } else {
+            console.log('\x1b[31mmessage.json does not exist\x1b[0m');
+        }
+    } catch(e) {
+        console.log(e);
+        console.log('\x1b[31mplease delete your message.json file\x1b[0m');
+    }
 });
