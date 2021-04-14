@@ -13,8 +13,15 @@ var messageLoc;
 var channelLoc;
 
 var mcIP = config.ip;
-var dIP = config.displayip;
+var dIP = config.ip;
+if(config.hasOwnProperty('displayip'){
+    dIP = config.displayip;
+}
 var mcPort = config.port;
+var dPort = config.port;
+if(config.hasOwnProperty('displayport'){
+    dPort = config.displayport;
+}
 var serverName = 'KOTH';
 var serverLogo = "https://i.imgur.com/szHlGja.png";
 
@@ -57,7 +64,7 @@ async function check(){
                 }
             ],
             "footer": {
-                "text": "IP: " + dIP + "\nUpdated at: " + time
+                "text": "IP: " + dIP + ":" + dPort + "\nUpdated at: " + time
             }
         };
         mess.edit({ embed });
@@ -86,7 +93,7 @@ async function check(){
                 }
             ],
             "footer": {
-                "text": "IP: " + dIP + "\nUpdated at: " + time
+                "text": "IP: " + dIP + ":" + dPort + "\nUpdated at: " + time
             }
         };
         mess.edit({ embed });
